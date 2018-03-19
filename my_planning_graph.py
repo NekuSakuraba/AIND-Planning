@@ -306,6 +306,20 @@ class PlanningGraph():
         #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
+        self.a_levels.append([])
+
+        for action in self.all_actions:
+            node = PgNode_a(action)
+
+            literals = [literal for literal in self.s_levels[level] if literal in node.prenodes]
+            if not literals:
+                continue
+
+            for literal in literals:
+                literal.children.add(node)
+                node.parents.add(literal)
+
+            self.a_levels[level].append(node)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -324,6 +338,14 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
+        self.s_levels.append(set())
+
+        for action in self.a_levels[level - 1]:
+            for effect in action.effnodes:
+                action.children.add(effect)
+                effect.parents.add(action)
+
+                self.s_levels[level].add(effect)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -382,7 +404,9 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
-        return False
+        return any([effect in node_a2.action.effect_add for effect in node_a1.action.effect_rem]) or \
+               any([effect in node_a2.action.effect_rem for effect in node_a1.action.effect_add])
+        # return False
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
