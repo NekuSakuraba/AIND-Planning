@@ -140,8 +140,6 @@ class AirCargoProblem(Problem):
         :param action: Action applied
         :return: resulting state after action
         """
-        assert str(action) in [str(a) for a in self.actions(state)], "The action isn't in `self.actions(state)`"
-
         current_state = decode_state(state, self.state_map)
         for effect in action.effect_add:
             current_state.neg.remove(effect)
@@ -267,16 +265,20 @@ def air_cargo_p3() -> AirCargoProblem:
 
 
 def At(x, y):
-    return expr(f'At({x}, {y})')
+    # return expr(f'At({x}, {y})')
+    return expr('At({}, {})'.format(x, y))
 
 
 def In(x, y):
-    return expr(f'In({x}, {y})')
+    # return expr(f'In({x}, {y})')
+    return expr('In({}, {})'.format(x, y))
 
 
 def Load(c, p, a):
-    return expr(f'Load({c}, {p}, {a})')
+    # return expr(f'Load({c}, {p}, {a})')
+    return expr('Load({}, {}, {})'.format(c, p, a))
 
 
 def Unload(c, p, a):
-    return expr(f'Unload({c}, {p}, {a})')
+    # return expr(f'Unload({c}, {p}, {a})')
+    return expr('Unload({}, {}, {})'.format(c, p, a))
